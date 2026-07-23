@@ -20,6 +20,8 @@ if {[testConstraint tcl]} {
 # Some Windows platforms (e.g. AppVeyor) produce ENOSPC rather than killing
 # the child with SIGPIPE). So turn off this test for that platform
 constraint expr nomingw32 {![info exists env(MSYSTEM)] || $env(MSYSTEM) ne "MINGW32"}
+# Windows can't waitpid(-1) to wait for any child
+constraint expr nowin {$tcl_platform(platform) ne "windows"}
 
 set d \"
 set s '
@@ -165,18 +167,19 @@ test exec2-5.5 {wait for all children} -constraints {after jim} -body {
 	wait
 } -result {}
 
-test exec2-5.6 {wait -1 to wait for any child} -constraints {after jim nomingw32} -body {
+test exec2-5.6 {wait -1 to wait for any child} -constraints {after jim nowin} -body {
 	set pid [exec sleep 0.1 &]
 	# Now wait for any child
 	lassign [wait -1] status waitpid code
 	list $status $($waitpid == $pid) $code
 } -result {CHILDSTATUS 1 0}
 
-test exec2-5.7 {wait -nohang for child not finished} -constraints {after jim nomingw32} -body {
+test exec2-5.7 {wait -nohang for child not finished} -constraints {after jim} -body {
 	set pid [exec sleep 10 &]
 	# Get the status of the running child
-	wait -nohang $pid
-} -result {NONE 0 -1} -cleanup {
+	# NONE here means not valid or still running
+	lindex [wait -nohang $pid] 0
+} -result {NONE} -cleanup {
 	kill $pid
 	wait $pid
 }

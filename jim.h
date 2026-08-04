@@ -938,10 +938,6 @@ JIM_EXPORT int Jim_CreateCommand (Jim_Interp *interp,
 
 /** Register the built-in core commands in an interpreter. */
 JIM_EXPORT void Jim_RegisterCoreCommands (Jim_Interp *interp);
-/** Create a new command backed by a C callback. */
-JIM_EXPORT int Jim_CreateCommand (Jim_Interp *interp,
-        const char *cmdName, Jim_CmdProc *cmdProc, void *privData,
-         Jim_DelCmdProc *delProc);
 /** Delete a command by name object. */
 JIM_EXPORT int Jim_DeleteCommand (Jim_Interp *interp,
         Jim_Obj *cmdNameObj);
